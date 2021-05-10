@@ -26,10 +26,10 @@ public class AuthHelper {
     static final String SCOPES = Config.getProperty("aad.scopes");
     static final String SIGN_OUT_ENDPOINT = Config.getProperty("aad.signOutEndpoint");
     static final String POST_SIGN_OUT_FRAGMENT = Config.getProperty("aad.postSignOutFragment");
+    static final String PROMPT = Config.getProperty("aad.prompt");
     static final Long STATE_TTL = Long.parseLong(Config.getProperty("app.stateTTL"));
     static final String REDIRECT_URI = Config.getProperty("app.redirectUri");
     static final String HOME_PAGE = Config.getProperty("app.homePage");
-    static final String PROMPT = Config.getProperty("app.prompt");
 
     public static ConfidentialClientApplication getConfidentialClientInstance(final String policy)
             throws Exception {
@@ -139,18 +139,13 @@ public class AuthHelper {
         if (policy.equals(EDIT_PROFILE_POLICY) && msalAuth.getAuthenticated()) {
             parameters = AuthorizationRequestUrlParameters.builder(REDIRECT_URI, Collections.singleton(SCOPES))
                     .responseMode(ResponseMode.QUERY).state(state).nonce(nonce).build();
-        } else if (Config.getProperty("app.prompt") != null) {
-            if (!PROMPT.trim().equals("")) {
-                Prompt prompt = Prompt.valueOf(PROMPT);
-                parameters = AuthorizationRequestUrlParameters.builder(REDIRECT_URI, Collections.singleton(SCOPES))
-                        .responseMode(ResponseMode.QUERY).prompt(prompt).state(state).nonce(nonce).build();
-            } else {
-                parameters = AuthorizationRequestUrlParameters.builder(REDIRECT_URI, Collections.singleton(SCOPES))
-                        .responseMode(ResponseMode.QUERY).state(state).nonce(nonce).build();
-            }
+        } else if (!PROMPT.trim().equals("")) {
+            Prompt prompt = Prompt.valueOf(PROMPT);
+            parameters = AuthorizationRequestUrlParameters.builder(REDIRECT_URI, Collections.singleton(SCOPES))
+                    .responseMode(ResponseMode.QUERY).prompt(prompt).state(state).nonce(nonce).build();
         } else {
             parameters = AuthorizationRequestUrlParameters.builder(REDIRECT_URI, Collections.singleton(SCOPES))
-                    .responseMode(ResponseMode.QUERY).prompt(Prompt.SELECT_ACCOUNT).state(state).nonce(nonce).build();
+                    .responseMode(ResponseMode.QUERY).state(state).nonce(nonce).build();
         }
 
         final String redirectUrl = client.getAuthorizationRequestUrl(parameters).toString();
